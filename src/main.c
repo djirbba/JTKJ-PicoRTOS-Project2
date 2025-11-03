@@ -41,7 +41,7 @@ static void sensor_task(void *arg){
     init_veml6030();
     // Tehtävä 2: Alusta valoisuusanturi. Etsi SDK-dokumentaatiosta sopiva funktio.
     // Exercise 2: Init the light sensor. Find in the SDK documentation the adequate function.
-   
+    
     for(;;){
         
         veml6030_read_light();
