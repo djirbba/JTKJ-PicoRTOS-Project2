@@ -34,7 +34,7 @@ void imu_task(void *pvParameters) {
     {
         if (ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t) == 0) {
             
-            printf("Accel: X=%f, Y=%f, Z=%f | Gyro: X=%f, Y=%f, Z=%f| Temp: %2.2f°C\n", ax, ay, az, gx, gy, gz, t);
+            printf("Accel: X=%f, Y=%f, Z=%f\n", ax, ay, az);
 
         } else {
             printf("Failed to read imu data\n");
