@@ -40,7 +40,7 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
     if (erotus > LIIKKEEN_RAJA) {
         programState = STATE_MOVING;
     } else {
-        programState = IDEL;
+        programState = IDLE;
     }
 
     aikaisempi_ax = ax;
