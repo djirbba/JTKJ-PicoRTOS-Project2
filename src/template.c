@@ -14,6 +14,8 @@
 #define DEFAULT_STACK_SIZE 2048 
 #define LIIKKEEN_RAJA 1? // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei 
 
+//TILAN PÄIVITYS
+
 //Add here necessary states
 enum state { IDLE=1, STATE_MOVING};
 enum state programState = IDLE;
@@ -35,6 +37,26 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
      // lasketaan seuraavaksi arvojen erotus, josta voidaan päätellä onko laite liikkeellä vai pysähtyneenä
     float erotus = fabs(aikaisempi_ax - ax) + fabs(aikaisempi_ay - ay) + fabs(aikaisempi_az - az);
 
+    if (erotus > LIIKKEEN_RAJA) {
+        programState = STATE_MOVING;
+    } else {
+        programState = IDEL;
+    }
+
+    aikaisempi_ax = ax;
+    aikaisempi_ay = ay;
+    aikaisempi_az = az;
+}
+//TILAN PÄIVITYS LOPPUU
+
+
+
+
+
+
+
+
+    
     //for(;;){
        // tight_loop_contents(); // Modify with application code here.
       //  vTaskDelay(pdMS_TO_TICKS(2000));
