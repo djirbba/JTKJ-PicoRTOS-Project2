@@ -86,6 +86,35 @@ void imu_task(void *pvParameters) {
 
 
 
+// PRINT-TASKI -tässä hyödynnetty examples/hello_serial_bidirectional_client
+
+static void print_task(void *arg){
+    (void)arg;
+
+    while(1){
+        switch(programState) {
+            case IDLE;
+                printf("- ");
+                break;
+            case STATE_MOVING;
+                printf(". ");
+                break;
+            
+        }
+        fflush(stdout); //lähettää . ja - heti, ei jää odottamaan rivinvaihtoa
+        vTaskDelay(pdMS_TO_TICKS(300));
+    }
+}
+        
+//PRINT-TASKI LOPPUU
+
+//MAIN - hyödynnettiin src/template esimerkkiä
+
+int main() {
+    stdio_init_all();
+    
+    init_hat_sdk();
+    sleep_ms(300); //Wait some time so initialization of USB and hat is done.
 
     
     //for(;;){
