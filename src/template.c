@@ -117,12 +117,14 @@ int main() {
     sleep_ms(300); //Wait some time so initialization of USB and hat is done.
 
     
-    //for(;;){
-       // tight_loop_contents(); // Modify with application code here.
-      //  vTaskDelay(pdMS_TO_TICKS(2000));
+   
     }
 }
 
+
+ //for(;;){
+       // tight_loop_contents(); // Modify with application code here.
+      //  vTaskDelay(pdMS_TO_TICKS(2000));
 int main() {
     stdio_init_all();
     // Uncomment this lines if you want to wait till the serial monitor is connected
