@@ -10,12 +10,14 @@
 
 #include "tkjhat/sdk.h"
 
-// Default stack size for the tasks. It can be reduced to 1024 if task is not using lot of memory.
-#define DEFAULT_STACK_SIZE 2048 
-#define LIIKKEEN_RAJA 1? // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei 
+
+#define DEFAULT_STACK_SIZE 1024
+#define LIIKKEEN_RAJA 0.15 // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei
+#define SAMPLE_DELAY_MS 200
+
+
 //TILAN PÄIVITYS
 
-//Add here necessary states
 enum state { IDLE=1, STATE_MOVING};
 enum state programState = IDLE;
 
@@ -49,7 +51,7 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
 //TILAN PÄIVITYS LOPPUU
 
 
-//IMU-ARVOJEN LUKEMINEN
+//IMU-ARVOJEN LUKEMINEN -hyödynnettiin examples/hat_im_cdc_ex
 
 
 void imu_task(void *pvParameters) {
@@ -62,16 +64,10 @@ void imu_task(void *pvParameters) {
         if (ICM42670_start_with_default_values() != 0){
             printf("ICM-42670P could not initialize accelerometer or gyroscope");
         }
-        /*int _enablegyro = ICM42670_enable_accel_gyro_ln_mode();
-        printf ("Enable gyro: %d\n",_enablegyro);
-        int _gyro = ICM42670_startGyro(ICM42670_GYRO_ODR_DEFAULT, ICM42670_GYRO_FSR_DEFAULT);
-        printf ("Gyro return:  %d\n", _gyro);
-        int _accel = ICM42670_startAccel(ICM42670_ACCEL_ODR_DEFAULT, ICM42670_ACCEL_FSR_DEFAULT);
-        printf ("Accel return:  %d\n", _accel);*/
     } else {
         printf("Failed to initialize ICM-42670P.\n");
     }
-    // Start collection data here. Infinite loop. 
+    // Datan keräys 
     while (1)
     {
         if (ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t) == 0) {
@@ -108,6 +104,7 @@ static void print_task(void *arg){
         
 //PRINT-TASKI LOPPUU
 
+
 //MAIN - hyödynnettiin src/template esimerkkiä
 
 int main() {
@@ -116,42 +113,17 @@ int main() {
     init_hat_sdk();
     sleep_ms(300); //Wait some time so initialization of USB and hat is done.
 
+    TaskHandle_t IMUTask = NULL;
+    TaskHandle_t PRINTTask =NULL;
     
-   
-    }
-}
+    xTaskCreate(imu_task,""IMU TASK", DEFAULT_STACK_SIZE, NULL, 2, &IMUTask);
+    xTaskCreate(print_task, "PRINT TASK", DEFAULT_STACK_SIZE, NULL, 2, &PRINTTask);
 
-
- //for(;;){
-       // tight_loop_contents(); // Modify with application code here.
-      //  vTaskDelay(pdMS_TO_TICKS(2000));
-int main() {
-    stdio_init_all();
-    // Uncomment this lines if you want to wait till the serial monitor is connected
-    /*while (!stdio_usb_connected()){
-        sleep_ms(10);
-    }*/ 
-    init_hat_sdk();
-    sleep_ms(300); //Wait some time so initialization of USB and hat is done.
-
-    TaskHandle_t myExampleTask = NULL;
-    // Create the tasks with xTaskCreate
-    BaseType_t result = xTaskCreate(example_task,       // (en) Task function
-                "example",              // (en) Name of the task 
-                DEFAULT_STACK_SIZE, // (en) Size of the stack for this task (in words). Generally 1024 or 2048
-                NULL,               // (en) Arguments of the task 
-                2,                  // (en) Priority of this task
-                &myExampleTask);    // (en) A handle to control the execution of this task
-
-    if(result != pdPASS) {
-        printf("Example Task creation failed\n");
-        return 0;
-    }
-
-    // Start the scheduler (never returns)
     vTaskStartScheduler();
 
-    // Never reach this line.
     return 0;
+    }
 }
+
+
 
