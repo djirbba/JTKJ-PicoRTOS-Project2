@@ -13,7 +13,7 @@
 
 
 #define DEFAULT_STACK_SIZE 1024
-#define LIIKKEEN_RAJA 0.15 // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei
+#define LIIKKEEN_RAJA 0.5 // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei
 #define SAMPLE_DELAY_MS 200
 
 
@@ -25,7 +25,9 @@ enum state programState = IDLE;
 
 
 static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset arvot, että voidaan tulkita onko liikettä tapahtunut (on jokin mihin verrata)
-    float aikaisempi_ax = 0, aikaisempi_ay = 0, aikaisempi_az = 0;
+    float static aikaisempi_ax = 0;
+    float static aikaisempi_ay = 0;
+    float static aikaisempi_az = 0;
     static bool first_read = true; // True, jolloin seuraava funktio alkaa pyörimään
 
     if (first_read){
@@ -38,7 +40,8 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
 
      // lasketaan seuraavaksi arvojen erotus, josta voidaan päätellä onko laite liikkeellä vai pysähtyneenä
     float erotus = fabs(aikaisempi_ax - ax) + fabs(aikaisempi_ay - ay) + fabs(aikaisempi_az - az);
-
+    
+    
     if (erotus > LIIKKEEN_RAJA) {
         programState = STATE_MOVING;
     } else {
@@ -49,6 +52,7 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
     aikaisempi_ay = ay;
     aikaisempi_az = az;
 }
+
 //TILAN PÄIVITYS LOPPUU
 
 
@@ -74,7 +78,7 @@ void imu_task(void *pvParameters) {
         if (ICM42670_read_sensor_data(&ax, &ay, &az, &gx, &gy, &gz, &t) == 0) {
             update_task(ax, ay, az);
         }
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(SAMPLE_DELAY_MS));
     }
 
 }
@@ -99,7 +103,7 @@ static void print_task(void *arg){
             
         }
         fflush(stdout); //lähettää . ja - heti, ei jää odottamaan rivinvaihtoa
-        vTaskDelay(pdMS_TO_TICKS(300));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
         
@@ -110,6 +114,9 @@ static void print_task(void *arg){
 
 int main() {
     stdio_init_all();
+    while (!stdio_usb_connected()){
+        sleep_ms(10);
+    }
     
     init_hat_sdk();
     sleep_ms(300); //Wait some time so initialization of USB and hat is done.
@@ -117,8 +124,8 @@ int main() {
     TaskHandle_t IMUTask = NULL;
     TaskHandle_t PRINTTask =NULL;
     
-    xTaskCreate(imu_task,"IMU TASK", DEFAULT_STACK_SIZE, NULL, 2, &IMUTask);
-    xTaskCreate(print_task, "PRINT TASK", DEFAULT_STACK_SIZE, NULL, 2, &PRINTTask);
+    xTaskCreate(imu_task,"IMU TASK", DEFAULT_STACK_SIZE, NULL, 3, &IMUTask);
+    xTaskCreate(print_task, "PRINT TASK", DEFAULT_STACK_SIZE, NULL, 1, &PRINTTask);
 
     vTaskStartScheduler();
 
