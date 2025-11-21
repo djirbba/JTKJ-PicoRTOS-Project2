@@ -1,3 +1,8 @@
+//Tekijät: Satu Vakkuri, Nea Niiranen, Iiris Pelkonen
+//Kaikki tehtävät on tehty yhdessä
+//Käytettiin tekoälyä ohjelman rakenteen suunnitteluun. 
+//Prompt: "Ohjelman on tarkoitus tulostaa "." laitteen liikkuessa ja "-" sen paikallaan ollessa. Millä tavalla examples/hat_im_cdc_ex 
+//         ja examples/hello_serial_bidirectional_client tiedostoja voisi hyödyntää yhdessä?"".
 
 #include <stdio.h>
 #include <string.h>
@@ -14,7 +19,7 @@
 
 #define DEFAULT_STACK_SIZE 1024
 #define LIIKKEEN_RAJA 0.5 // valitaan arvo, joka pitää ylittää että voidaan määrittää liikkuuko sensori vai ei
-#define SAMPLE_DELAY_MS 200
+#define SAMPLE_DELAY_MS 200 
 
 
 //TILAN PÄIVITYS
@@ -38,7 +43,7 @@ static void update_task(float ax, float ay, float az){  // Alustaa ensimmäiset 
         return;
     }
 
-     // lasketaan seuraavaksi arvojen erotus, josta voidaan päätellä onko laite liikkeellä vai pysähtyneenä
+     // lasketaan seuraavaksi arvojen erotus, josta voidaan päätellä onko kiihtyvyyttä vai ei
     float erotus = fabs(aikaisempi_ax - ax) + fabs(aikaisempi_ay - ay) + fabs(aikaisempi_az - az);
     
     
@@ -63,7 +68,7 @@ void imu_task(void *pvParameters) {
     (void)pvParameters;
     
     float ax, ay, az, gx, gy, gz, t;
-    // Setting up the sensor. 
+    // alustaminen
     if (init_ICM42670() == 0) {
         printf("ICM-42670P initialized successfully!\n");
         if (ICM42670_start_with_default_values() != 0){
@@ -92,6 +97,7 @@ void imu_task(void *pvParameters) {
 static void print_task(void *arg){
     (void)arg;
 
+    //ikuinen silmukka, tulostaa "-" tai "." tilakoneen tilan mukaan
     while(1){
         switch(programState) {
             case IDLE:
@@ -102,7 +108,7 @@ static void print_task(void *arg){
                 break;
             
         }
-        fflush(stdout); //lähettää . ja - heti, ei jää odottamaan rivinvaihtoa
+        fflush(stdout); //lähettää "." ja "-" heti, ei jää odottamaan rivinvaihtoa
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
@@ -113,17 +119,20 @@ static void print_task(void *arg){
 //MAIN - hyödynnettiin src/template esimerkkiä
 
 int main() {
+    //alustukset ja varmistetaan että ohjelma odottaa usb:n yhdistämisen
     stdio_init_all();
     while (!stdio_usb_connected()){
         sleep_ms(10);
     }
     
     init_hat_sdk();
-    sleep_ms(300); //Wait some time so initialization of USB and hat is done.
+    sleep_ms(300); 
 
+    //kahvat
     TaskHandle_t IMUTask = NULL;
     TaskHandle_t PRINTTask =NULL;
-    
+
+    //tehtävät
     xTaskCreate(imu_task,"IMU TASK", DEFAULT_STACK_SIZE, NULL, 3, &IMUTask);
     xTaskCreate(print_task, "PRINT TASK", DEFAULT_STACK_SIZE, NULL, 1, &PRINTTask);
 
