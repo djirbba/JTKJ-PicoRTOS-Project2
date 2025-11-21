@@ -1,7 +1,7 @@
 //Tekijät: Satu Vakkuri, Nea Niiranen, Iiris Pelkonen
 //Kaikki tehtävät on tehty yhdessä
 //Käytettiin tekoälyä ohjelman rakenteen suunnitteluun. 
-//Prompt: "Ohjelman on tarkoitus tulostaa "." laitteen liikkuessa ja "-" sen paikallaan ollessa. Millä tavalla examples/hat_im_cdc_ex 
+//ChatGPT prompt: "Ohjelman on tarkoitus tulostaa "." laitteen liikkuessa ja "-" sen paikallaan ollessa. Millä tavalla examples/hat_im_cdc_ex 
 //         ja examples/hello_serial_bidirectional_client tiedostoja voisi hyödyntää yhdessä?"".
 
 #include <stdio.h>
